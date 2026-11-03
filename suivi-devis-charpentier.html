@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivi des devis — charpentier</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#e9ece6; --col:#dfe4da; --card:#ffffff; --ink:#1c2a22; --soft:#5d6c62; --line:#c4cdbf;
+  --fir:#2c4a3a; --larch:#b9772c; --on-fir:#ffffff; --late:#a8412f;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111a15; --col:#19251e; --card:#213128; --ink:#e7efe9; --soft:#9fb2a6; --line:#2f4438;
+    --fir:#79b595; --larch:#e0a15c; --on-fir:#0f1a14; --late:#e57f6c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111a15; --col:#19251e; --card:#213128; --ink:#e7efe9; --soft:#9fb2a6; --line:#2f4438;
+  --fir:#79b595; --larch:#e0a15c; --on-fir:#0f1a14; --late:#e57f6c;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 48px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:24px;margin:0 0 2px;color:var(--fir)}
+.sub{color:var(--soft);margin:0 0 16px;font-size:14px}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;font-size:14px}
+.stats b{font-size:18px;color:var(--larch)}
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:14px;align-items:flex-start}
+.col{flex:0 0 238px;background:var(--col);border-top:4px solid var(--larch);border-radius:0 0 8px 8px;padding:10px}
+.col h2{font-size:14px;margin:0 0 2px}
+.col .tot{font-size:12px;color:var(--soft);margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer}
+.card:hover,.card:focus-visible{border-color:var(--fir);outline:none}
+.card .cl{font-weight:600}
+.card .ch{color:var(--soft);font-size:13px}
+.card .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:13px}
+.card .amt{font-weight:700;color:var(--fir)}
+.late{color:var(--late);font-weight:600}
+.empty{font-size:13px;color:var(--soft);padding:6px 2px}
+.panel{position:fixed;inset:0;background:rgba(10,20,15,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.panel.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:88%;overflow:auto;border-radius:14px 14px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet h3{margin:0 0 2px;font-size:19px;color:var(--fir)}
+.meta{color:var(--soft);font-size:13px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--soft);margin:10px 0 4px}
+select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px}
+textarea{min-height:150px;resize:vertical}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:12px 16px;min-height:46px;cursor:pointer}
+.pri{background:var(--fir);color:var(--on-fir)}
+.gho{background:transparent;color:var(--fir);border:1px solid var(--fir)}
+.hint{font-size:12px;color:var(--soft);margin-top:6px}
+.foot{font-size:12px;color:var(--soft);margin-top:10px}
+.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.how summary{font-weight:700;color:var(--fir);cursor:pointer;min-height:28px}
+.how ol{margin:10px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;counter-reset:s}
+.how li{counter-increment:s;font-size:14px;color:var(--soft);border-left:3px solid var(--larch);padding-left:10px}
+.how li b{display:block;color:var(--ink);font-size:14px}
+.how li b::before{content:counter(s) ". ";color:var(--larch)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Suivi des devis</h1>
+  <p class="sub">Atelier de charpente — chaque devis avance de colonne en colonne, les relances se préparent seules.</p>
+  <details class="how" open>
+    <summary>Comment ça marche</summary>
+    <ol>
+      <li><b>Le devis entre dans le suivi</b>Après la visite, le projet est créé avec le client, le chantier et le montant.</li>
+      <li><b>Il avance d’étape en étape</b>Visite, devis à envoyer, envoyé, accepté, chantier en cours : on change d’étape en touchant la carte.</li>
+      <li><b>Les délais sont surveillés</b>Sans réponse après 7 jours, le devis passe en rouge pour ne pas être oublié.</li>
+      <li><b>La relance est préparée</b>Un message adapté au délai est proposé : l’artisan le relit, le copie et l’envoie.</li>
+      <li><b>Les totaux se mettent à jour</b>Montant en attente, relances à faire et montant accepté, d’un coup d’œil.</li>
+    </ol>
+  </details>
+  <div class="stats">
+    <div><b id="sPipe">0</b><br>de devis en attente</div>
+    <div><b id="sLate">0</b><br>à relancer</div>
+    <div><b id="sWon">0</b><br>acceptés</div>
+  </div>
+  <div class="board" id="board"></div>
+  <p class="foot">Démonstration : clients et montants fictifs, relance générée par modèle (dans l’outil final, rédigée par Claude et relue par l’artisan).</p>
+</div>
+
+<div class="panel" id="panel" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h3 id="pN"></h3>
+    <div class="meta" id="pM"></div>
+    <label for="pS">Étape du devis</label>
+    <select id="pS"></select>
+    <label for="pT">Message de relance proposé</label>
+    <textarea id="pT"></textarea>
+    <div class="hint">Brouillon à relire avant envoi.</div>
+    <div class="btns">
+      <button class="pri" id="pC" type="button">Copier le message</button>
+      <button class="gho" id="pX" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS=["Visite à planifier","Devis à envoyer","Envoyé","À relancer","Accepté","Chantier en cours"];
+const D=[
+ {id:1,cl:"M. Lefèvre",ch:"Charpente traditionnelle, maison neuve",amt:18400,st:0,days:1},
+ {id:2,cl:"Mme Garnier",ch:"Extension ossature bois 30 m²",amt:27900,st:1,days:2},
+ {id:3,cl:"Famille Roux",ch:"Réfection de toiture",amt:12600,st:2,days:3},
+ {id:4,cl:"M. Dubois",ch:"Carport en chêne",amt:5200,st:2,days:9},
+ {id:5,cl:"Mme Perrin",ch:"Rénovation de charpente ancienne",amt:21300,st:3,days:16},
+ {id:6,cl:"M. Marchand",ch:"Terrasse bois et pergola",amt:8900,st:4,days:0},
+ {id:7,cl:"Mairie de Saint-Aubin",ch:"Préau d’école",amt:34500,st:5,days:0}
+];
+const $=id=>document.getElementById(id);
+const eur=n=>n.toLocaleString("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+let cur=null;
+function isLate(c){return c.st===2&&c.days>=7;}
+function stats(){
+  $("sPipe").textContent=eur(D.filter(c=>c.st>=1&&c.st<=3).reduce((s,c)=>s+c.amt,0));
+  $("sLate").textContent=D.filter(c=>c.st===3||isLate(c)).length;
+  $("sWon").textContent=eur(D.filter(c=>c.st>=4).reduce((s,c)=>s+c.amt,0));
+}
+function draw(){
+  $("board").innerHTML=STEPS.map((s,i)=>{
+    const cs=D.filter(c=>c.st===i);
+    const tot=cs.reduce((a,c)=>a+c.amt,0);
+    return `<div class="col"><h2>${s}</h2><div class="tot">${cs.length} devis · ${eur(tot)}</div>`+
+      (cs.map(c=>`<div class="card" tabindex="0" data-id="${c.id}"><div class="cl">${c.cl}</div><div class="ch">${c.ch}</div><div class="row"><span class="amt">${eur(c.amt)}</span>${(c.st===2||c.st===3)?`<span class="${(isLate(c)||c.st===3)?"late":""}">envoyé il y a ${c.days} j</span>`:""}</div></div>`).join("")||`<div class="empty">Aucun devis</div>`)+`</div>`;
+  }).join("");
+  document.querySelectorAll(".card").forEach(el=>{
+    const open=()=>openCard(+el.dataset.id);
+    el.addEventListener("click",open);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter")open();});
+  });
+  stats();
+}
+function relance(c){
+  const sal=c.cl.startsWith("Famille")||c.cl.startsWith("Mairie")?"Bonjour,":"Bonjour "+c.cl+",";
+  const soft=c.days<10;
+  return sal+"\n\nJe me permets de revenir vers vous au sujet du devis pour "+c.ch.toLowerCase()+" ("+eur(c.amt)+"), envoyé il y a "+c.days+" jours.\n\n"+
+    (soft?"Avez-vous pu le consulter ? Je reste disponible pour répondre à vos questions.":"Je comprends que votre choix demande réflexion. Si certains points du devis vous font hésiter (délais, matériaux, budget), je peux le revoir avec vous ou passer sur place pour en discuter.")+
+    "\n\nBien cordialement,\nVotre charpentier";
+}
+function openCard(id){
+  cur=D.find(c=>c.id===id);
+  $("pN").textContent=cur.cl;
+  $("pM").textContent=cur.ch+" — "+eur(cur.amt);
+  $("pS").innerHTML=STEPS.map((s,i)=>`<option value="${i}" ${i===cur.st?"selected":""}>${s}</option>`).join("");
+  $("pT").value=(cur.st===2||cur.st===3)?relance(cur):"Pas de relance nécessaire à cette étape.";
+  $("panel").classList.add("open");
+}
+$("pS").addEventListener("change",e=>{cur.st=+e.target.value;if(cur.st===2||cur.st===3){if(!cur.days)cur.days=1;}$("pT").value=(cur.st===2||cur.st===3)?relance(cur):"Pas de relance nécessaire à cette étape.";draw();});
+$("pX").addEventListener("click",()=>$("panel").classList.remove("open"));
+$("panel").addEventListener("click",e=>{if(e.target.id==="panel")$("panel").classList.remove("open");});
+$("pC").addEventListener("click",()=>{
+  try{navigator.clipboard.writeText($("pT").value);$("pC").textContent="Message copié";}
+  catch(e){$("pT").select();$("pC").textContent="Sélectionné : copiez-le";}
+  setTimeout(()=>{$("pC").textContent="Copier le message";},1800);
+});
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visites et clients — charpentier</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#e9ece6; --card:#ffffff; --ink:#1c2a22; --soft:#5d6c62; --line:#c4cdbf;
+  --fir:#2c4a3a; --larch:#b9772c; --on-fir:#ffffff;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111a15; --card:#213128; --ink:#e7efe9; --soft:#9fb2a6; --line:#2f4438;
+    --fir:#79b595; --larch:#e0a15c; --on-fir:#0f1a14;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111a15; --card:#213128; --ink:#e7efe9; --soft:#9fb2a6; --line:#2f4438;
+  --fir:#79b595; --larch:#e0a15c; --on-fir:#0f1a14;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 48px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:24px;margin:0 0 2px;color:var(--fir)}
+.sub{color:var(--soft);margin:0 0 16px;font-size:14px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;background:transparent;color:var(--fir);border:1px solid var(--fir)}
+.tab.on{background:var(--fir);color:var(--on-fir)}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 10px}
+textarea,input[type=text],select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:13px 16px;min-height:48px;cursor:pointer}
+.mic{background:var(--larch);color:#fff}
+.mic.rec{outline:3px solid var(--larch);outline-offset:2px}
+.pri{background:var(--fir);color:var(--on-fir)}
+.gho{background:transparent;color:var(--fir);border:1px solid var(--fir)}
+.note{font-size:13px;color:var(--soft);margin-top:8px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;margin-bottom:6px}
+.kv span:nth-child(odd){color:var(--soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chip{font-size:13px;border:1px solid var(--larch);color:var(--larch);border-radius:99px;padding:2px 10px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:400px}
+th{text-align:left;font-size:13px;color:var(--soft);font-weight:500;border-bottom:2px solid var(--ink);padding:6px}
+td{padding:8px 6px;border-bottom:1px solid var(--line)}
+.n{text-align:right;white-space:nowrap}
+input[type=number]{width:76px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px}
+.tot{margin:12px 0 0 auto;max-width:260px}
+.tot div{display:flex;justify-content:space-between;padding:2px 0}
+.ttc{font-weight:700;font-size:18px;color:var(--larch);border-top:2px solid var(--ink);margin-top:4px;padding-top:6px}
+.cli{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px;cursor:pointer;background:var(--bg)}
+.cli:hover,.cli:focus-visible{border-color:var(--fir);outline:none}
+.cli b{display:block}
+.cli span{font-size:13px;color:var(--soft)}
+.hist{border-left:3px solid var(--larch);padding-left:12px;margin:10px 0 0 4px}
+.hist div{margin-bottom:10px}
+.hist small{color:var(--soft)}
+.hide{display:none}
+.ok{color:var(--fir);font-weight:600;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Visites et clients</h1>
+  <p class="sub">Dictez votre visite sur place : la note, la base du devis et la fiche client se remplissent.</p>
+  <div class="tabs">
+    <button class="tab on" id="t1" type="button">Compte rendu de visite</button>
+    <button class="tab" id="t2" type="button">Clients</button>
+  </div>
+
+  <div id="v1">
+    <section>
+      <h2>Dictée</h2>
+      <textarea id="txt" placeholder="Appuyez sur le micro, ou saisissez votre compte rendu…"></textarea>
+      <div class="row">
+        <button class="mic" id="mic" type="button">Dicter</button>
+        <button class="pri" id="go" type="button">Structurer</button>
+        <button class="gho" id="ex" type="button">Utiliser un exemple</button>
+      </div>
+      <div class="note" id="micnote"></div>
+    </section>
+    <section id="res" class="hide">
+      <h2>Note de visite</h2>
+      <div class="kv"><span>Client</span><span id="rc"></span><span>Chantier</span><span id="ra"></span><span>Ouvrage</span><span id="ro"></span><span>Bois</span><span id="rb"></span></div>
+      <div class="chips" id="chips"></div>
+      <h2 style="margin-top:16px">Base du devis</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Désignation</th><th class="n">Qté</th><th class="n">Prix unit. HT</th><th class="n">Total HT</th></tr></thead>
+        <tbody id="lines"></tbody>
+      </table></div>
+      <div class="tot">
+        <div><span>Total HT</span><span id="ht"></span></div>
+        <div><span>TVA <select id="tva" style="width:auto;padding:4px"><option value="5.5">5,5 %</option><option value="10" selected>10 %</option><option value="20">20 %</option></select></span><span id="tv"></span></div>
+        <div class="ttc"><span>Total TTC</span><span id="ttc"></span></div>
+      </div>
+      <div class="note">Prix fictifs au m², tirés du catalogue de l’artisan. TVA et mentions légales à valider avant envoi.</div>
+      <div class="row"><button class="pri" id="save" type="button">Enregistrer dans la fiche client</button></div>
+      <div class="ok hide" id="ok"></div>
+    </section>
+  </div>
+
+  <div id="v2" class="hide">
+    <section>
+      <h2>Clients</h2>
+      <input type="text" id="q" placeholder="Rechercher un client ou un chantier">
+      <div id="list"></div>
+    </section>
+    <section id="fiche" class="hide">
+      <h2 id="fn"></h2>
+      <div class="note" id="fa" style="margin:0 0 8px"></div>
+      <div class="hist" id="fh"></div>
+    </section>
+  </div>
+  <p class="note">Démonstration : données fictives, structuration simulée par règles (dans l’outil final, Claude analyse la dictée).</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const eur=n=>n.toLocaleString("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+const TYPES=[
+ {re:/ossature/,name:"Extension ossature bois",p:1100},
+ {re:/carport/,name:"Carport",p:180},
+ {re:/terrasse|pergola/,name:"Terrasse / pergola bois",p:110},
+ {re:/toiture|couverture/,name:"Réfection de toiture",p:95},
+ {re:/charpente/,name:"Charpente",p:140}
+];
+const clients=[
+ {n:"M. Lefèvre",a:"4 rue des Tilleuls",h:[{d:"12/09/2026",o:"Charpente traditionnelle",m:18400,s:"Devis envoyé"}]},
+ {n:"Mme Perrin",a:"21 route de Lavoux",h:[{d:"02/07/2025",o:"Rénovation de charpente ancienne",m:21300,s:"Devis à relancer"},{d:"14/03/2023",o:"Abri de jardin",m:3200,s:"Chantier terminé"}]},
+ {n:"M. Marchand",a:"9 impasse du Moulin",h:[{d:"28/10/2026",o:"Terrasse bois et pergola",m:8900,s:"Devis accepté"}]},
+ {n:"Famille Roux",a:"17 rue de la Gare",h:[{d:"05/10/2026",o:"Réfection de toiture",m:12600,s:"Devis envoyé"}]}
+];
+let lines=[],cur=null;
+const EX="Visite chez Madame Garnier, au 8 chemin des Vignes. Extension en ossature bois d’environ 30 mètres carrés, en douglas. Poutres existantes avec un peu d’humidité côté nord. Accès étroit, camion limité, prévoir une grue.";
+
+function show(v){
+  $("v1").classList.toggle("hide",v!==1);$("v2").classList.toggle("hide",v!==2);
+  $("t1").classList.toggle("on",v===1);$("t2").classList.toggle("on",v===2);
+  if(v===2)list();
+}
+$("t1").onclick=()=>show(1);$("t2").onclick=()=>show(2);
+
+function structure(){
+  const raw=$("txt").value.trim();if(!raw){$("txt").focus();return;}
+  const t=raw.toLowerCase();
+  let c=raw.match(/chez\s+((?:m\.|mme|madame|monsieur|mr|famille)\s*[A-Za-zÀ-ÿ-]+)/i);
+  let name=c?c[1].replace(/^madame/i,"Mme").replace(/^monsieur/i,"M."):"Client à préciser";
+  const a=raw.match(/(?:au|à)\s+(\d+[^,.]*?(?:rue|avenue|chemin|route|impasse)[^,.]*)/i);
+  const ty=TYPES.find(x=>x.re.test(t));
+  const s=t.match(/(\d+(?:[.,]\d+)?)\s*(?:m²|m2|mètres? carrés?)/);
+  const surf=s?parseFloat(s[1].replace(",",".")):0;
+  const w=t.match(/chêne|douglas|sapin|épicéa|lamellé[- ]collé/);
+  cur={name,addr:a?a[1]:"À préciser",type:ty?ty.name:"Ouvrage à préciser",wood:w?w[0]:"À préciser"};
+  const notes=[];
+  if(/humid/.test(t))notes.push("Humidité signalée");
+  if(/termite|insecte|capricorne/.test(t))notes.push("Insectes à vérifier");
+  if(/pourri|dégradé|vermoulu/.test(t))notes.push("Bois dégradé");
+  if(/étroit|camion|grue|accès/.test(t))notes.push("Accès contraint");
+  lines=[];
+  if(ty)lines.push({l:ty.name+" ("+cur.wood+")",q:surf||1,p:ty.p});
+  if(/dépose|ancien/.test(t))lines.push({l:"Dépose de l’existant",q:surf||1,p:35});
+  if(/grue/.test(t))lines.push({l:"Location de grue (journée)",q:1,p:650});
+  $("rc").textContent=cur.name;$("ra").textContent=cur.addr;$("ro").textContent=cur.type+(surf?" — "+surf+" m²":"");$("rb").textContent=cur.wood;
+  $("chips").innerHTML=notes.map(n=>`<span class="chip">${n}</span>`).join("")||`<span class="note">Aucun point de vigilance relevé.</span>`;
+  $("res").classList.remove("hide");$("ok").classList.add("hide");
+  draw();$("res").scrollIntoView({behavior:"smooth"});
+}
+function draw(){
+  $("lines").innerHTML=lines.map((x,i)=>`<tr><td>${x.l}</td><td class="n"><input type="number" min="0" step="0.5" value="${x.q}" data-i="${i}" aria-label="Quantité"></td><td class="n">${eur(x.p)}</td><td class="n">${eur(x.q*x.p)}</td></tr>`).join("")||`<tr><td colspan="4">Ouvrage non reconnu : précisez-le dans la dictée.</td></tr>`;
+  $("lines").querySelectorAll("input").forEach(e=>e.onchange=ev=>{lines[+ev.target.dataset.i].q=Math.max(0,parseFloat(ev.target.value)||0);draw();});
+  const ht=lines.reduce((s,x)=>s+x.q*x.p,0),tv=ht*parseFloat($("tva").value)/100;
+  $("ht").textContent=eur(ht);$("tv").textContent=eur(tv);$("ttc").textContent=eur(ht+tv);
+}
+$("tva").onchange=draw;$("go").onclick=structure;
+$("ex").onclick=()=>{$("txt").value=EX;structure();};
+$("save").onclick=()=>{
+  const ht=lines.reduce((s,x)=>s+x.q*x.p,0);
+  let c=clients.find(x=>x.n===cur.name);
+  if(!c){c={n:cur.name,a:cur.addr,h:[]};clients.unshift(c);}
+  c.h.unshift({d:new Date().toLocaleDateString("fr-FR"),o:cur.type,m:ht,s:"Visite faite, devis à envoyer"});
+  $("ok").textContent="Visite enregistrée dans la fiche de "+cur.name+" (onglet Clients).";
+  $("ok").classList.remove("hide");
+};
+function list(){
+  const q=$("q").value.toLowerCase();
+  $("list").innerHTML=clients.filter(c=>(c.n+" "+c.h.map(h=>h.o).join(" ")).toLowerCase().includes(q)).map(c=>`<div class="cli" tabindex="0" data-n="${c.n}"><b>${c.n}</b><span>${c.a} — ${c.h.length} chantier${c.h.length>1?"s":""}</span></div>`).join("")||`<div class="note">Aucun client trouvé.</div>`;
+  document.querySelectorAll(".cli").forEach(e=>{const o=()=>fiche(e.dataset.n);e.onclick=o;e.onkeydown=ev=>{if(ev.key==="Enter")o();};});
+}
+function fiche(n){
+  const c=clients.find(x=>x.n===n);
+  $("fn").textContent=c.n;$("fa").textContent=c.a;
+  $("fh").innerHTML=c.h.map(h=>`<div><b>${h.o}</b> — ${eur(h.m)} HT<br><small>${h.d} · ${h.s}</small></div>`).join("");
+  $("fiche").classList.remove("hide");$("fiche").scrollIntoView({behavior:"smooth"});
+}
+$("q").oninput=list;
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,on=false;
+const msg="Micro indisponible ici : utilisez le micro du clavier du téléphone, ou l’exemple.";
+if(!SR){$("mic").classList.add("hide");$("micnote").textContent="Dictée du navigateur non disponible : utilisez le micro du clavier du téléphone, ou l’exemple.";}
+else $("mic").onclick=()=>{
+  try{
+    if(on){rec.stop();return;}
+    rec=new SR();rec.lang="fr-FR";rec.continuous=true;rec.interimResults=false;
+    rec.onresult=e=>{let s="";for(let i=0;i<e.results.length;i++)s+=e.results[i][0].transcript+" ";$("txt").value=s.trim();};
+    rec.onend=()=>{on=false;$("mic").classList.remove("rec");$("mic").textContent="Dicter";};
+    rec.onerror=()=>{$("micnote").textContent=msg;};
+    rec.start();on=true;$("mic").classList.add("rec");$("mic").textContent="Arrêter";
+  }catch(e){$("micnote").textContent=msg;}
+};
+</script>
+</body>
+</html>

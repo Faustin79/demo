@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adhérents et bénévoles — association</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#ecebf3; --card:#ffffff; --ink:#1f2036; --soft:#60617d; --line:#d0d0e0;
+  --ind:#3b3f8f; --coral:#c9512f; --ok:#2f7a55; --on-ind:#ffffff;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#14152a; --card:#1e2040; --ink:#e9e9f6; --soft:#a5a6c6; --line:#34365e;
+    --ind:#9aa0f0; --coral:#f08a68; --ok:#6fd1a0; --on-ind:#14152a;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#14152a; --card:#1e2040; --ink:#e9e9f6; --soft:#a5a6c6; --line:#34365e;
+  --ind:#9aa0f0; --coral:#f08a68; --ok:#6fd1a0; --on-ind:#14152a;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 48px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:24px;margin:0 0 2px;color:var(--ind)}
+.sub{color:var(--soft);margin:0 0 14px;font-size:14px}
+.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.how summary{font-weight:700;color:var(--ind);cursor:pointer;min-height:28px}
+.how ol{margin:10px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;counter-reset:s}
+.how li{counter-increment:s;font-size:14px;color:var(--soft);border-left:3px solid var(--coral);padding-left:10px}
+.how li b{display:block;color:var(--ink)}
+.how li b::before{content:counter(s) ". ";color:var(--coral)}
+.stats{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-size:14px}
+.stats b{font-size:20px;color:var(--coral)}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:12px 16px;min-height:46px;cursor:pointer}
+.tab{flex:1;background:transparent;color:var(--ind);border:1px solid var(--ind)}
+.tab.on,.pri{background:var(--ind);color:var(--on-ind)}
+.gho{background:transparent;color:var(--ind);border:1px solid var(--ind)}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{min-height:38px;padding:6px 14px;border-radius:99px;background:transparent;color:var(--ind);border:1px solid var(--ind);font-weight:500}
+.chip.on{background:var(--ind);color:var(--on-ind)}
+.m{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:10px 0;cursor:pointer}
+.m:hover b,.m:focus-visible b{color:var(--ind)}
+.m:focus-visible{outline:none}
+.m small{color:var(--soft);display:block}
+.tag{font-size:13px;font-weight:600;border-radius:99px;padding:2px 10px;border:1px solid;white-space:nowrap}
+.t-ok{color:var(--ok)} .t-warn{color:var(--coral)} .t-late{color:#b3261e;border-width:2px}
+@media (prefers-color-scheme:dark){.t-late{color:#ff8a80}}
+.panel{position:fixed;inset:0;background:rgba(10,10,25,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.panel.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:88%;overflow:auto;border-radius:14px 14px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet h3{margin:0 0 2px;font-size:19px;color:var(--ind)}
+textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px}
+textarea{min-height:140px;resize:vertical;margin-top:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:12px;color:var(--soft);margin-top:6px}
+.slot{border-top:1px solid var(--line);padding:12px 0}
+.slot h4{margin:0 0 4px;font-size:15px;display:flex;justify-content:space-between}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 8px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.who span{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:2px 6px 2px 12px;font-size:14px}
+.who button{min-height:0;padding:0 6px;background:none;color:var(--soft);font-size:16px}
+.role{display:flex;gap:8px;margin-bottom:12px}
+.bubble{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;border-radius:99px;font-weight:700;font-size:14px;color:#fff;padding:0 10px}
+.b-red{background:#c62828}.b-green{background:#2e7d32}
+#adm{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:14px}
+#adm input{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px;margin-top:8px}
+.frow{display:grid;grid-template-columns:1fr 80px;gap:8px}
+.rem{border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0 14px}
+.rem label{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:14px}
+.rem input{width:20px;height:20px}
+.msg{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:14px}
+.msg.alert{border-color:#c62828;border-width:2px}
+.slot input[type=text],.slot input[type=number]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px;margin-top:8px}
+.foot{font-size:12px;color:var(--soft)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Adhérents et bénévoles</h1>
+  <p class="sub">Association Les Amis du Quartier — un seul fichier pour les cotisations, les rappels et le planning des bénévoles.</p>
+
+  <details class="how" open>
+    <summary>Comment ça marche</summary>
+    <ol>
+      <li><b>Un fichier unique</b>Adhérents, bénévoles et cotisations sont réunis au même endroit, fini les tableurs dispersés.</li>
+      <li><b>Les échéances sont surveillées</b>Une cotisation qui arrive à échéance sous 30 jours passe en « à renouveler », puis en « expirée ».</li>
+      <li><b>Le rappel est préparé</b>Un message personnalisé est proposé : le responsable le relit, le copie et l’envoie.</li>
+      <li><b>Le planning se remplit en direct</b>L’administrateur crée l’événement et ses créneaux, les bénévoles s’inscrivent ou se désengagent depuis leur compte, et une bulle passe du rouge au vert quand le créneau est complet.</li>
+      <li><b>Le bilan est prêt</b>Chiffres d’adhésion et de mobilisation disponibles pour l’assemblée générale ou un dossier de subvention.</li>
+    </ol>
+  </details>
+
+  <div class="stats">
+    <div><b id="sOk">0</b><br>adhérents à jour</div>
+    <div><b id="sRen">0</b><br>à relancer</div>
+    <div><b id="sVol">0</b><br>places bénévoles à pourvoir</div>
+  </div>
+
+  <div class="role"><button class="tab on" id="rA" type="button">Vue administrateur</button><button class="tab" id="rB" type="button">Vue bénévole</button></div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" id="t1" type="button">Adhérents</button>
+    <button class="tab" id="t2" type="button">Événements</button>
+  </div>
+
+  <div id="v1">
+    <section>
+      <div class="chips" id="chips"></div>
+      <div id="list"></div>
+    </section>
+  </div>
+
+  <div id="v2" class="hide">
+    <section>
+      <h2 id="evH">Événements</h2>
+      <div id="adm" class="hide"><b>Créer un événement</b><input id="fE" type="text" placeholder="Nom de l’événement"><input id="fD" type="date" aria-label="Date"><div class="frow"><input id="fS" type="text" placeholder="Créneau, par exemple Accueil, 10 h à 12 h"><input id="fN" type="number" min="1" value="3" aria-label="Bénévoles nécessaires"></div><div class="hint" id="fL"></div><div class="row"><button class="gho" id="fA" type="button">Ajouter le créneau</button><button class="pri" id="fP" type="button">Publier l’événement</button></div></div>
+      <div id="vol" class="hide"><label class="hint" for="me">Connecté en tant que</label><select id="me"></select></div>
+      <div class="hint" id="evHint" style="margin:6px 0"></div>
+      <div id="rem" class="rem hide"><b>Rappels automatiques</b>
+        <label><input type="checkbox" id="r1" checked> Rappel aux bénévoles inscrits, 2 jours avant</label>
+        <label><input type="checkbox" id="r2" checked> Alerte à l’administrateur, 3 jours avant, si un créneau est incomplet</label>
+        <div class="row"><button class="gho" id="rSim" type="button">Simuler l’envoi des rappels</button></div>
+        <div id="remOut"></div>
+      </div>
+      <div id="remVol" class="hint hide">Vous recevrez un rappel 2 jours avant chaque créneau auquel vous êtes inscrit(e).</div>
+      <div id="slots"></div>
+    </section>
+  </div>
+
+  <p class="foot">Démonstration : personnes et données fictives, rappel généré par modèle (dans l’outil final, rédigé par Claude et relu par le responsable).</p>
+</div>
+
+<div class="panel" id="panel" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h3 id="pN"></h3>
+    <div class="hint" id="pM"></div>
+    <textarea id="pT"></textarea>
+    <div class="hint">Brouillon à relire avant envoi.</div>
+    <div class="row">
+      <button class="pri" id="pC" type="button">Copier le message</button>
+      <button class="gho" id="pX" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const DAY=864e5, today=new Date();
+const M=[
+ {n:"Claire Martin",type:"Individuelle",amt:20,off:-24},
+ {n:"Famille Benali",type:"Famille",amt:35,off:6},
+ {n:"Thomas Girard",type:"Individuelle",amt:20,off:19},
+ {n:"Sophie Lambert",type:"Individuelle",amt:20,off:120},
+ {n:"Karim Haddad",type:"Individuelle",amt:20,off:200},
+ {n:"Nadine Colin",type:"Famille",amt:35,off:-3},
+ {n:"Paul Rousseau",type:"Individuelle",amt:20,off:310}
+].map(m=>({...m,d:new Date(today.getTime()+m.off*DAY)}));
+const V=["Léa","Mohamed","Inès","Julien","Marie","Samuel"];
+const S=[
+ {t:"Installation, 8 h à 10 h",need:3,who:["Léa","Julien"]},
+ {t:"Accueil et stand, 10 h à 13 h",need:4,who:["Marie"]},
+ {t:"Caisse, 13 h à 16 h",need:2,who:[]},
+ {t:"Rangement, 17 h à 19 h",need:3,who:["Samuel","Inès","Mohamed"]}
+];
+const st=m=>m.off<0?"late":m.off<=30?"warn":"ok";
+const lab={ok:"À jour",warn:"À renouveler",late:"Expirée"};
+const fd=d=>d.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+let filt="all",cur=null;
+
+function stats(){
+  $("sOk").textContent=M.filter(m=>st(m)==="ok").length;
+  $("sRen").textContent=M.filter(m=>st(m)!=="ok").length;
+  $("sVol").textContent=S.reduce((a,s)=>a+Math.max(0,s.need-s.who.length),0);
+}
+function drawList(){
+  const f=[["all","Tous"],["ok","À jour"],["warn","À renouveler"],["late","Expirées"]];
+  $("chips").innerHTML=f.map(([k,l])=>`<button class="chip ${filt===k?"on":""}" data-k="${k}" type="button">${l}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{filt=b.dataset.k;drawList();});
+  $("list").innerHTML=M.filter(m=>filt==="all"||st(m)===filt).map(m=>`<div class="m" tabindex="0" data-n="${m.n}"><div><b>${m.n}</b><small>${m.type} — échéance le ${fd(m.d)}</small></div><span class="tag t-${st(m)}">${lab[st(m)]}</span></div>`).join("")||`<div class="hint">Aucun adhérent dans cette catégorie.</div>`;
+  $("list").querySelectorAll(".m").forEach(e=>{const o=()=>openM(e.dataset.n);e.onclick=o;e.onkeydown=ev=>{if(ev.key==="Enter")o();};});
+  stats();
+}
+function msg(m){
+  const p=m.n.split(" ")[0];
+  if(st(m)==="ok")return "Aucun rappel nécessaire : l’adhésion de "+m.n+" est valable jusqu’au "+fd(m.d)+".";
+  const late=st(m)==="late";
+  return "Bonjour "+p+",\n\n"+(late?"Votre adhésion à l’association Les Amis du Quartier est arrivée à échéance le "+fd(m.d)+".":"Votre adhésion à l’association Les Amis du Quartier arrive à échéance le "+fd(m.d)+".")+
+   "\n\nPour la renouveler ("+m.amt+" €, adhésion "+m.type.toLowerCase()+"), vous pouvez régler en main propre lors d’une permanence ou par virement. Votre soutien compte beaucoup pour nos actions de l’année.\n\nÀ très bientôt,\nL’équipe de l’association";
+}
+function openM(n){
+  cur=M.find(m=>m.n===n);
+  $("pN").textContent=cur.n;
+  $("pM").textContent=lab[st(cur)]+" — "+cur.type+", "+cur.amt+" €";
+  $("pT").value=msg(cur);
+  $("panel").classList.add("open");
+}
+$("pX").onclick=()=>$("panel").classList.remove("open");
+$("panel").onclick=e=>{if(e.target.id==="panel")$("panel").classList.remove("open");};
+$("pC").onclick=()=>{
+  try{navigator.clipboard.writeText($("pT").value);$("pC").textContent="Message copié";}
+  catch(e){$("pT").select();$("pC").textContent="Sélectionné : copiez-le";}
+  setTimeout(()=>{$("pC").textContent="Copier le message";},1800);
+};
+
+function drawSlots(){
+  $("slots").innerHTML=S.map((s,i)=>{
+    const miss=s.need-s.who.length,pct=Math.min(100,s.who.length/s.need*100);
+    const opts=V.filter(v=>!s.who.includes(v));
+    return `<div class="slot"><h4><span>${s.t}</span><span class="${miss>0?"t-warn":"t-ok"}">${s.who.length}/${s.need}</span></h4>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="who">${s.who.map(w=>`<span>${w}<button type="button" data-i="${i}" data-w="${w}" aria-label="Retirer ${w}">×</button></span>`).join("")}</div>
+      ${miss>0&&opts.length?`<select data-i="${i}" aria-label="Ajouter un bénévole"><option value="">Ajouter un bénévole…</option>${opts.map(o=>`<option>${o}</option>`).join("")}</select>`:`<div class="hint">${miss>0?"Plus de bénévole disponible.":"Créneau complet."}</div>`}</div>`;
+  }).join("");
+  $("slots").querySelectorAll("select").forEach(e=>e.onchange=ev=>{if(ev.target.value){S[+e.dataset.i].who.push(ev.target.value);drawSlots();}});
+  $("slots").querySelectorAll(".who button").forEach(b=>b.onclick=()=>{const s=S[+b.dataset.i];s.who=s.who.filter(w=>w!==b.dataset.w);drawSlots();});
+  stats();
+}
+function tab(v){
+  $("v1").classList.toggle("hide",v!==1);$("v2").classList.toggle("hide",v!==2);
+  $("t1").classList.toggle("on",v===1);$("t2").classList.toggle("on",v===2);
+}
+$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
+
+let role="A",me="Léa",draft=[];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const E=[{name:"Marché de quartier",date:"samedi",slots:[{t:"Installation, 8 h à 10 h",need:3,who:["Léa","Julien"]},{t:"Accueil et stand, 10 h à 13 h",need:4,who:["Marie"]},{t:"Caisse, 13 h à 16 h",need:2,who:[]},{t:"Rangement, 17 h à 19 h",need:3,who:["Samuel","Inès","Mohamed"]}]}];
+const left=s=>s.need-s.who.length;
+function stats(){
+  $("sOk").textContent=M.filter(m=>st(m)==="ok").length;
+  $("sRen").textContent=M.filter(m=>st(m)!=="ok").length;
+  $("sVol").textContent=E.reduce((a,e)=>a+e.slots.reduce((b,s)=>b+Math.max(0,left(s)),0),0);
+}
+function tab(v){
+  $("v1").classList.toggle("hide",v!==1);$("v2").classList.toggle("hide",v!==2);
+  $("t1").classList.toggle("on",v===1);$("t2").classList.toggle("on",v===2);
+}
+function setRole(r){
+  role=r;
+  $("rA").classList.toggle("on",r==="A");$("rB").classList.toggle("on",r==="B");
+  $("tabs").classList.toggle("hide",r==="B");
+  document.querySelector(".stats").classList.toggle("hide",r==="B");
+  $("adm").classList.toggle("hide",r==="B");$("vol").classList.toggle("hide",r==="A");
+  $("evH").textContent=r==="A"?"Événements et créneaux":"Événements ouverts aux inscriptions";
+  $("evHint").textContent=r==="A"?"Les bulles passent du rouge au vert quand un créneau est complet.":"Inscrivez-vous à un créneau, ou désengagez-vous si vous n’êtes plus disponible.";
+  tab(r==="B"?2:1);drawSlots();
+}
+function drawSlots(){
+  const bub=(n,d)=>`<span class="bubble ${n>=d?"b-green":"b-red"}">${n}/${d}</span>`;
+  $("slots").innerHTML=E.map((e,ei)=>{
+    if(role==="A"&&editing===ei)return editorHTML(e,ei);
+    const tn=e.slots.reduce((a,s)=>a+s.need,0),ti=e.slots.reduce((a,s)=>a+Math.min(s.who.length,s.need),0);
+    return `<div class="slot"><h4><span>${esc(e.name)}${e.date?" — "+esc(e.date):""}</span>${role==="A"?bub(ti,tn):""}</h4>`+(role==="A"?(confirmDel===ei?`<div class="row" style="margin:0 0 6px"><button class="pri" data-x="delok" data-e="${ei}" type="button">Confirmer la suppression</button><button class="gho" data-x="delno" type="button">Annuler</button></div>`:`<div class="row" style="margin:0 0 6px"><button class="gho" data-x="edit" data-e="${ei}" type="button">Modifier</button><button class="gho" data-x="del" data-e="${ei}" type="button">Supprimer</button></div>`):"")+
+    e.slots.map((s,si)=>{
+      const full=left(s)<=0,mine=s.who.includes(me);
+      const right=role==="A"?bub(s.who.length,s.need):(mine?`<button class="gho" data-e="${ei}" data-s="${si}" data-a="out" type="button">Me désengager</button>`:(full?`<span class="t-ok">Complet</span>`:`<button class="pri" data-e="${ei}" data-s="${si}" data-a="in" type="button">M’inscrire</button>`));
+      const info=role==="A"?(full?"Complet":"Il manque "+left(s)+" bénévole"+(left(s)>1?"s":""))+(s.who.length?" — "+esc(s.who.join(", ")):""):s.who.length+"/"+s.need+" places prises";
+      return `<div class="m" style="cursor:default"><div><b>${esc(s.t)}</b><small>${info}</small></div>${right}</div>`;
+    }).join("")+`</div>`;
+  }).join("");
+  $("slots").querySelectorAll("button[data-a]").forEach(b=>b.onclick=()=>{
+    const s=E[+b.dataset.e].slots[+b.dataset.s];
+    if(b.dataset.a==="in"){if(left(s)>0&&!s.who.includes(me))s.who.push(me);}else s.who=s.who.filter(w=>w!==me);
+    drawSlots();
+  });
+  stats();
+}
+$("me").innerHTML=V.map(v=>`<option>${v}</option>`).join("");
+$("me").onchange=e=>{me=e.target.value;drawSlots();};
+function drawDraft(){$("fL").textContent=draft.length?"Créneaux : "+draft.map(d=>d.t+" ("+d.need+")").join(" ; "):"Aucun créneau ajouté pour l’instant.";}
+$("fA").onclick=()=>{const t=$("fS").value.trim(),n=parseInt($("fN").value)||0;if(!t||n<1){$("fS").focus();return;}draft.push({t,need:n,who:[]});$("fS").value="";drawDraft();};
+$("fP").onclick=()=>{
+  const name=$("fE").value.trim();
+  if(!name){$("fE").focus();return;}
+  if(!draft.length){$("fS").focus();return;}
+  const dv=$("fD").value;
+  E.unshift({name,date:dv?fd(new Date(dv+"T12:00:00")):"",slots:draft});
+  draft=[];$("fE").value="";$("fD").value="";drawDraft();drawSlots();
+};
+$("rA").onclick=()=>setRole("A");$("rB").onclick=()=>setRole("B");
+const _sr=setRole;
+setRole=function(r){editing=-1;confirmDel=-1;_sr(r);$("rem").classList.toggle("hide",r==="B");$("remVol").classList.toggle("hide",r==="A");$("remOut").innerHTML="";};
+$("rSim").onclick=()=>{
+  const out=[];
+  if($("r1").checked)E.forEach(e=>{
+    const by={};e.slots.forEach(s=>s.who.forEach(w=>(by[w]=by[w]||[]).push(s.t)));
+    Object.keys(by).forEach(w=>out.push(`<div class="msg"><b>Rappel envoyé à ${esc(w)}</b><br>Bonjour ${esc(w)}, petit rappel : vous êtes inscrit(e) à « ${esc(by[w].join(" » et « "))} » pour l’événement « ${esc(e.name)} ». Si vous n’êtes plus disponible, merci de vous désengager depuis votre compte. Merci pour votre aide !</div>`));
+  });
+  if($("r2").checked){
+    const inc=[];E.forEach(e=>e.slots.forEach(s=>{if(left(s)>0)inc.push(e.name+" : "+s.t+" ("+s.who.length+"/"+s.need+")");}));
+    out.push(inc.length?`<div class="msg alert"><b>Alerte administrateur</b><br>${inc.length>1?inc.length+" créneaux incomplets":"1 créneau incomplet"} : ${esc(inc.join(" ; "))}. Une relance aux bénévoles disponibles est conseillée.</div>`:`<div class="msg"><b>Alerte administrateur</b><br>Tous les créneaux sont complets : rien à signaler.</div>`);
+  }
+  $("remOut").innerHTML=out.join("")||`<div class="hint">Aucun rappel activé.</div>`;
+};
+let editing=-1,confirmDel=-1;
+function editorHTML(e,ei){
+  return `<div class="slot"><b>Modifier l’événement</b>
+  <input id="eN" type="text" value="${esc(e.name)}" aria-label="Nom de l’événement">
+  <input id="eD" type="text" value="${esc(e.date||"")}" aria-label="Date" placeholder="Date">
+  ${e.slots.map((s,si)=>`<div class="frow"><input class="eT" type="text" value="${esc(s.t)}" aria-label="Créneau"><input class="eQ" type="number" min="1" value="${s.need}" aria-label="Bénévoles nécessaires"></div><div class="hint">${s.who.length} inscrit${s.who.length>1?"s":""}${s.who.length?" : "+esc(s.who.join(", ")):""} <button class="gho" style="min-height:32px;padding:4px 10px" data-x="rm" data-e="${ei}" data-s="${si}" type="button">Retirer ce créneau</button></div>`).join("")}
+  <div class="frow"><input id="eNT" type="text" placeholder="Ajouter un créneau"><input id="eNQ" type="number" min="1" value="2" aria-label="Bénévoles nécessaires"></div>
+  <div class="row"><button class="pri" data-x="save" data-e="${ei}" type="button">Enregistrer</button><button class="gho" data-x="cancel" type="button">Annuler</button></div></div>`;
+}
+function applyEdits(e){
+  const n=$("eN"),dt=$("eD");if(!n)return;
+  if(n.value.trim())e.name=n.value.trim();
+  e.date=dt.value.trim();
+  const T=document.querySelectorAll("#slots .eT"),Q=document.querySelectorAll("#slots .eQ");
+  e.slots.forEach((s,i)=>{if(T[i]&&T[i].value.trim())s.t=T[i].value.trim();if(Q[i])s.need=Math.max(1,parseInt(Q[i].value)||s.need);});
+}
+$("slots").addEventListener("click",ev=>{
+  const b=ev.target.closest("button[data-x]");if(!b)return;
+  const x=b.dataset.x,ei=+b.dataset.e,e=E[ei];
+  if(x==="edit")editing=ei;
+  else if(x==="cancel")editing=-1;
+  else if(x==="del")confirmDel=ei;
+  else if(x==="delno")confirmDel=-1;
+  else if(x==="delok"){E.splice(ei,1);confirmDel=-1;editing=-1;}
+  else if(x==="rm"){applyEdits(e);if(e.slots.length>1)e.slots.splice(+b.dataset.s,1);}
+  else if(x==="save"){applyEdits(e);const nt=$("eNT").value.trim();if(nt)e.slots.push({t:nt,need:Math.max(1,parseInt($("eNQ").value)||1),who:[]});editing=-1;}
+  drawSlots();
+});
+const _ds=drawSlots;
+drawSlots=function(){_ds();if(!E.length)$("slots").innerHTML=`<div class="hint">Aucun événement pour l’instant.</div>`;};
+drawList();drawDraft();setRole("A");
+</script>
+</body>
+</html>

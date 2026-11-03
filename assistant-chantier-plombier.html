@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assistant de chantier — plombier</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eaf0f4; --card:#ffffff; --ink:#16232e; --soft:#5a6b78; --line:#cdd8e0;
+  --blue:#1d4e6b; --copper:#b4572a; --ok:#2d6a4f; --on-blue:#ffffff;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101a22; --card:#182530; --ink:#e6eef3; --soft:#9db0bd; --line:#2c3e4b;
+    --blue:#5aa3c9; --copper:#e08a5a; --ok:#6fcf97; --on-blue:#0d1a22;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101a22; --card:#182530; --ink:#e6eef3; --soft:#9db0bd; --line:#2c3e4b;
+  --blue:#5aa3c9; --copper:#e08a5a; --ok:#6fcf97; --on-blue:#0d1a22;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 48px}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:24px;margin:0 0 4px;color:var(--blue)}
+.sub{color:var(--soft);margin:0 0 20px;font-size:14px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 10px}
+textarea{width:100%;min-height:96px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:14px 18px;cursor:pointer;min-height:48px}
+.primary{background:var(--blue);color:var(--on-blue)}
+.mic{background:var(--copper);color:#fff}
+.mic.rec{outline:3px solid var(--copper);outline-offset:2px}
+.ghost{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+.note{font-size:13px;color:var(--soft);margin-top:8px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;margin-bottom:12px}
+.kv span:nth-child(odd){color:var(--soft)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:420px}
+th{text-align:left;font-size:13px;color:var(--soft);font-weight:500;border-bottom:2px solid var(--ink);padding:6px 6px}
+td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n,th.n{text-align:right;white-space:nowrap}
+input[type=number]{width:64px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px}
+select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px}
+.tot{margin-top:12px;margin-left:auto;max-width:280px}
+.tot div{display:flex;justify-content:space-between;padding:3px 0}
+.tot .ttc{font-weight:700;font-size:19px;border-top:2px solid var(--ink);margin-top:4px;padding-top:6px;color:var(--copper)}
+.hide{display:none}
+.warn{font-size:13px;color:var(--soft);border-left:3px solid var(--copper);padding-left:10px;margin-top:12px}
+@media print{body{background:#fff;color:#000}section:not(#devis),.noprint{display:none}section{border:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Assistant de chantier</h1>
+  <p class="sub">Dictez la fin de votre intervention, le devis se prépare tout seul.</p>
+
+  <section>
+    <h2>1. Dictée</h2>
+    <textarea id="txt" placeholder="Appuyez sur le micro et parlez, ou saisissez le texte…"></textarea>
+    <div class="row">
+      <button class="mic" id="mic" type="button">Dicter</button>
+      <button class="primary" id="go" type="button">Structurer</button>
+      <button class="ghost" id="ex" type="button">Utiliser un exemple</button>
+    </div>
+    <div class="note" id="micnote"></div>
+  </section>
+
+  <section id="data" class="hide">
+    <h2>2. Données comprises</h2>
+    <div class="kv">
+      <span>Client</span><span id="cl"></span>
+      <span>Adresse</span><span id="ad"></span>
+    </div>
+    <div class="note">Corrigez les quantités si besoin : le devis se met à jour.</div>
+  </section>
+
+  <section id="devis" class="hide">
+    <h2>3. Devis</h2>
+    <div class="note" id="dmeta" style="margin:0 0 10px"></div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Désignation</th><th class="n">Qté</th><th class="n">Prix unit. HT</th><th class="n">Total HT</th></tr></thead>
+        <tbody id="lines"></tbody>
+      </table>
+    </div>
+    <div class="tot">
+      <div><span>Total HT</span><span id="ht"></span></div>
+      <div><span>TVA <select id="tva"><option value="5.5">5,5 %</option><option value="10" selected>10 %</option><option value="20">20 %</option></select></span><span id="tv"></span></div>
+      <div class="ttc"><span>Total TTC</span><span id="ttc"></span></div>
+    </div>
+    <div class="warn">Les prix viennent du catalogue de l’artisan, jamais de l’IA. Le taux de TVA et les mentions légales sont à valider avant envoi.</div>
+    <div class="row noprint"><button class="primary" id="pr" type="button">Imprimer / PDF</button></div>
+  </section>
+
+  <p class="note">Démonstration : catalogue et client fictifs, structuration simulée.</p>
+</div>
+
+<script>
+const CAT=[
+ {re:/chauffe[- ]?eau/,label:"Chauffe-eau électrique 200 L",p:489},
+ {re:/siphon/,label:"Siphon de lavabo",p:14.5},
+ {re:/mitigeur/,label:"Mitigeur lavabo",p:79},
+ {re:/robinet/,label:"Robinet d’arrêt",p:22},
+ {re:/flexible/,label:"Flexible de raccordement",p:9.8},
+ {re:/raccord|joint/,label:"Raccord / joint",p:6.5}
+];
+const RATE=52, NUM={un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6};
+const $=id=>document.getElementById(id);
+const eur=n=>n.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+let lines=[];
+const EXAMPLE="Chez Madame Durand, au 12 rue des Lilas. Remplacement du chauffe-eau, un chauffe-eau de 200 litres, deux heures et demie de main d’œuvre, plus un siphon et deux flexibles.";
+
+function qtyOf(t,re){
+  const m=t.match(new RegExp("(\\d+|un|une|deux|trois|quatre|cinq|six)\\s+(?:[\\wéèêàç’'-]+\\s+){0,2}?"+re.source));
+  if(!m)return 1;
+  return NUM[m[1]]||parseInt(m[1],10)||1;
+}
+function hoursOf(t){
+  const m=t.match(/(\d+(?:[.,]\d+)?|un|une|deux|trois|quatre|cinq|six)\s+heures?(\s+et\s+demie?)?/);
+  if(!m)return 0;
+  let h=NUM[m[1]]||parseFloat(m[1].replace(",","."))||0;
+  if(m[2])h+=0.5;
+  return h;
+}
+function structure(){
+  const raw=$("txt").value.trim();
+  if(!raw){$("txt").focus();return;}
+  const t=raw.toLowerCase();
+  const c=raw.match(/chez\s+((?:m\.|mme|madame|monsieur|mr)\s*[A-Za-zÀ-ÿ-]+)/i);
+  const a=raw.match(/(?:au|à)\s+(\d+[^,.]*?(?:rue|avenue|boulevard|chemin)[^,.]*)/i);
+  $("cl").textContent=c?c[1]:"À préciser";
+  $("ad").textContent=a?a[1]:"À préciser";
+  lines=[];
+  CAT.forEach(it=>{if(it.re.test(t))lines.push({label:it.label,qty:qtyOf(t,it.re),p:it.p});});
+  const h=hoursOf(t);
+  if(h>0)lines.push({label:"Main-d’œuvre (heure)",qty:h,p:RATE});
+  $("data").classList.remove("hide");
+  $("devis").classList.remove("hide");
+  const d=new Date().toLocaleDateString("fr-FR");
+  $("dmeta").textContent="Devis du "+d+" pour "+(c?c[1]:"client à préciser");
+  draw();
+  $("data").scrollIntoView({behavior:"smooth"});
+}
+function draw(){
+  $("lines").innerHTML=lines.map((l,i)=>`<tr><td>${l.label}</td><td class="n"><input type="number" min="0" step="0.5" value="${l.qty}" data-i="${i}" aria-label="Quantité"></td><td class="n">${eur(l.p)}</td><td class="n">${eur(l.qty*l.p)}</td></tr>`).join("")||`<tr><td colspan="4">Aucun article reconnu dans la dictée.</td></tr>`;
+  $("lines").querySelectorAll("input").forEach(el=>el.addEventListener("change",e=>{
+    lines[+e.target.dataset.i].qty=Math.max(0,parseFloat(e.target.value)||0);draw();
+  }));
+  totals();
+}
+function totals(){
+  const ht=lines.reduce((s,l)=>s+l.qty*l.p,0);
+  const tv=ht*parseFloat($("tva").value)/100;
+  $("ht").textContent=eur(ht);$("tv").textContent=eur(tv);$("ttc").textContent=eur(ht+tv);
+}
+$("tva").addEventListener("change",totals);
+$("go").addEventListener("click",structure);
+$("ex").addEventListener("click",()=>{$("txt").value=EXAMPLE;structure();});
+$("pr").addEventListener("click",()=>{try{window.print();}catch(e){}});
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,on=false;
+if(!SR){$("mic").classList.add("hide");$("micnote").textContent="Dictée vocale non disponible sur ce navigateur : saisissez le texte ou utilisez l’exemple.";}
+else{
+  $("mic").addEventListener("click",()=>{
+    try{
+      if(on){rec.stop();return;}
+      rec=new SR();rec.lang="fr-FR";rec.interimResults=false;rec.continuous=true;
+      rec.onresult=e=>{let s="";for(let i=0;i<e.results.length;i++)s+=e.results[i][0].transcript+" ";$("txt").value=s.trim();};
+      rec.onend=()=>{on=false;$("mic").classList.remove("rec");$("mic").textContent="Dicter";};
+      rec.onerror=()=>{$("micnote").textContent="Micro indisponible ici : saisissez le texte ou utilisez l’exemple.";};
+      rec.start();on=true;$("mic").classList.add("rec");$("mic").textContent="Arrêter";
+    }catch(err){$("micnote").textContent="Micro indisponible ici : saisissez le texte ou utilisez l’exemple.";}
+  });
+}
+</script>
+</body>
+</html>

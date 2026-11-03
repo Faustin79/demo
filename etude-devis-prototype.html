@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Étude des devis — prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#e4d9b9;
+  --paper-2:#d8c9a0;
+  --paper-3:#cdbb8c;
+  --ink:#2b2620;
+  --ink-soft:#655b49;
+  --blue:#2f4858;
+  --blue-soft:#4c6577;
+  --red:#a63a2e;
+  --green:#3c6e47;
+  --line:rgba(43,38,32,.22);
+  --line-soft:rgba(43,38,32,.12);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(43,38,32,.025) 0px, rgba(43,38,32,.025) 1px, transparent 1px, transparent 3px);
+  color:var(--ink);
+  font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  font-size:14px;
+  line-height:1.5;
+  padding:28px 20px 60px;
+}
+.wrap{max-width:980px;margin:0 auto;}
+
+/* ---------- header ---------- */
+header{
+  border-bottom:2px solid var(--ink);
+  padding-bottom:16px;
+  margin-bottom:22px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:16px;
+}
+h1{
+  font-family:'Source Serif 4', Georgia, serif;
+  font-weight:700;
+  font-size:30px;
+  margin:0 0 4px;
+  color:var(--blue);
+  letter-spacing:.2px;
+}
+.subtitle{color:var(--ink-soft); font-size:13px;}
+.dossier-tag{
+  border:1px solid var(--ink);
+  padding:3px 8px;
+  font-size:11px;
+  color:var(--ink-soft);
+  white-space:nowrap;
+}
+
+/* ---------- weights ---------- */
+.weights{
+  display:flex;
+  gap:26px;
+  flex-wrap:wrap;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  padding:14px 18px;
+  margin-bottom:26px;
+}
+.weight{flex:1; min-width:170px;}
+.weight label{
+  display:flex; justify-content:space-between;
+  font-size:12px; color:var(--ink-soft); margin-bottom:6px;
+}
+.weight label span.val{color:var(--blue); font-weight:600;}
+input[type=range]{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:3px; background:var(--ink); border-radius:0; outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:14px; height:14px; background:var(--blue);
+  border:2px solid var(--paper); cursor:pointer; border-radius:50%;
+  margin-top:-6px;
+}
+input[type=range]::-moz-range-thumb{
+  width:14px; height:14px; background:var(--blue);
+  border:2px solid var(--paper); cursor:pointer; border-radius:50%;
+}
+
+/* ---------- section titles ---------- */
+.section-title{
+  font-family:'Source Serif 4', Georgia, serif;
+  font-size:17px;
+  color:var(--ink);
+  margin:0 0 12px;
+  display:flex; align-items:baseline; gap:8px;
+}
+.section-title small{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px; color:var(--ink-soft); font-weight:400;
+}
+
+/* ---------- inbox ---------- */
+.inbox{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding-bottom:14px;
+  margin-bottom:26px;
+}
+.envelope{
+  flex:0 0 210px;
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-top:5px solid var(--paper-3);
+  padding:12px 12px 10px;
+  cursor:pointer;
+  position:relative;
+  transition:transform .12s ease, border-top-color .12s ease;
+}
+.envelope:hover{transform:translateY(-3px);}
+.envelope.active{
+  border-top-color:var(--blue);
+  background:#fff9e8;
+  transform:translateY(-3px);
+}
+.envelope .from{font-weight:600; font-size:13px; margin-bottom:3px;}
+.envelope .obj{color:var(--ink-soft); font-size:12px; margin-bottom:8px; min-height:32px;}
+.envelope .meta{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:6px;}
+.envelope .clip{opacity:.7;}
+
+/* ---------- fiche ---------- */
+.fiche{
+  background:#fff9e8;
+  border:1px solid var(--ink);
+  padding:20px 22px;
+  margin-bottom:30px;
+  position:relative;
+}
+.fiche .badge-auto{
+  position:absolute; top:16px; right:18px;
+  font-size:10px; color:var(--blue-soft);
+  border:1px solid var(--blue-soft);
+  padding:2px 7px;
+}
+.fiche h2{
+  font-family:'Source Serif 4', Georgia, serif;
+  font-size:20px; margin:0 0 2px; color:var(--ink);
+}
+.fiche .fiche-sub{color:var(--ink-soft); font-size:12px; margin-bottom:16px;}
+.fiche-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px 30px;
+}
+.field{border-bottom:1px solid var(--line-soft); padding-bottom:8px;}
+.field .k{font-size:11px; color:var(--ink-soft); margin-bottom:3px;}
+.field .v{font-size:15px; font-weight:600;}
+.field .v.price{color:var(--blue); font-family:'Source Serif 4', serif; font-size:19px;}
+.stamps{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;}
+.stamp-mini{
+  font-size:10px; border:1px solid var(--green); color:var(--green);
+  padding:2px 6px; transform:rotate(-2deg);
+}
+.stamp-mini.none{border-color:var(--ink-soft); color:var(--ink-soft);}
+
+/* ---------- table ---------- */
+.ledger{width:100%; border-collapse:collapse; margin-bottom:10px;}
+.ledger th{
+  text-align:left; font-size:11px; color:var(--ink-soft); font-weight:500;
+  border-bottom:2px solid var(--ink); padding:0 10px 8px;
+}
+.ledger td{
+  padding:12px 10px; border-bottom:1px solid var(--line-soft); font-size:13px; vertical-align:middle;
+}
+.ledger tr.top td{background:rgba(60,110,71,.08);}
+.supplier-cell .name{font-weight:600; font-size:14px;}
+.supplier-cell .obj{font-size:11px; color:var(--ink-soft);}
+.score-bar-wrap{width:110px; background:var(--line-soft); height:8px; position:relative;}
+.score-bar{height:8px; background:var(--blue);}
+.score-num{font-size:12px; margin-top:4px; color:var(--ink-soft);}
+.verdict{
+  display:inline-block; font-size:10px; padding:3px 8px;
+  border:2px solid var(--green); color:var(--green); transform:rotate(-3deg);
+  white-space:nowrap;
+}
+td.num{font-family:'IBM Plex Mono',monospace;}
+
+footer{margin-top:34px; padding-top:14px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Étude des devis</h1>
+      <div class="subtitle">Rénovation atelier bois — chantier d'insertion · dossier ouvert le 3 sept. 2026</div>
+    </div>
+    <div class="dossier-tag">Dossier n° 2026-014</div>
+  </header>
+
+  <div class="weights">
+    <div class="weight">
+      <label>Poids — prix <span class="val" id="wPriceVal">4</span></label>
+      <input type="range" id="wPrice" min="0" max="10" value="4">
+    </div>
+    <div class="weight">
+      <label>Poids — délai <span class="val" id="wDelayVal">3</span></label>
+      <input type="range" id="wDelay" min="0" max="10" value="3">
+    </div>
+    <div class="weight">
+      <label>Poids — qualité <span class="val" id="wQualVal">5</span></label>
+      <input type="range" id="wQual" min="0" max="10" value="5">
+    </div>
+  </div>
+
+  <div class="section-title">Boîte de réception <small>4 devis reçus par email — pièces jointes lues automatiquement</small></div>
+  <div class="inbox" id="inbox"></div>
+
+  <div class="fiche" id="fiche"></div>
+
+  <div class="section-title">Comparatif <small>classement recalculé selon les poids ci-dessus</small></div>
+  <table class="ledger">
+    <thead>
+      <tr>
+        <th>Fournisseur</th>
+        <th>Prix TTC</th>
+        <th>Délai</th>
+        <th>Qualité</th>
+        <th>Score</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="ledgerBody"></tbody>
+  </table>
+
+  <footer>
+    Prototype de démonstration — données et extraction simulées. Les scores sont recalculés en direct à partir des trois curseurs de pondération.
+  </footer>
+</div>
+
+<script>
+const devis = [
+  {
+    id:1,
+    from:"Menuiserie Vernier",
+    email:"contact@menuiserie-vernier.fr",
+    date:"1 sept.",
+    obj:"Devis rénovation atelier — lot bois",
+    prix:18400,
+    delai:6,
+    garantie:10,
+    certifs:["RGE"],
+    avis:4.6
+  },
+  {
+    id:2,
+    from:"Atelier Dupré & Fils",
+    email:"devis@dupre-fils.fr",
+    date:"1 sept.",
+    obj:"Proposition travaux atelier bois",
+    prix:15900,
+    delai:10,
+    garantie:2,
+    certifs:[],
+    avis:3.9
+  },
+  {
+    id:3,
+    from:"BoisConcept Pro",
+    email:"pro@boisconcept.fr",
+    date:"2 sept.",
+    obj:"Re: demande de devis — rénovation",
+    prix:21200,
+    delai:4,
+    garantie:10,
+    certifs:["RGE","Qualibat"],
+    avis:4.8
+  },
+  {
+    id:4,
+    from:"Artisan Lemoine",
+    email:"j.lemoine.artisan@gmail.com",
+    date:"3 sept.",
+    obj:"Devis — atelier bois, votre demande",
+    prix:14700,
+    delai:12,
+    garantie:1,
+    certifs:[],
+    avis:3.5
+  },
+];
+
+let selectedId = 1;
+
+function qualityScore(d){
+  const certScore = d.certifs.length===0?20:(d.certifs.length===1?65:100);
+  const garScore = Math.min(d.garantie/10,1)*100;
+  const avisScore = (d.avis/5)*100;
+  return (certScore+garScore+avisScore)/3;
+}
+
+function computeScores(){
+  const wPrice = +document.getElementById('wPrice').value;
+  const wDelay = +document.getElementById('wDelay').value;
+  const wQual = +document.getElementById('wQual').value;
+  const totalW = (wPrice+wDelay+wQual) || 1;
+
+  const prices = devis.map(d=>d.prix);
+  const delais = devis.map(d=>d.delai);
+  const minP=Math.min(...prices), maxP=Math.max(...prices);
+  const minD=Math.min(...delais), maxD=Math.max(...delais);
+
+  return devis.map(d=>{
+    const priceScore = maxP===minP?100:100*(maxP-d.prix)/(maxP-minP);
+    const delayScore = maxD===minD?100:100*(maxD-d.delai)/(maxD-minD);
+    const qualScore = qualityScore(d);
+    const score = (priceScore*wPrice + delayScore*wDelay + qualScore*wQual)/totalW;
+    return {...d, score, qualScore};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+function renderInbox(){
+  const inbox = document.getElementById('inbox');
+  inbox.innerHTML = devis.map(d=>`
+    <div class="envelope ${d.id===selectedId?'active':''}" data-id="${d.id}">
+      <div class="from">${d.from}</div>
+      <div class="obj">${d.obj}</div>
+      <div class="meta"><span class="clip">📎 devis.pdf</span><span>${d.date}</span></div>
+    </div>
+  `).join('');
+  inbox.querySelectorAll('.envelope').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      selectedId = +el.dataset.id;
+      renderAll();
+    });
+  });
+}
+
+function renderFiche(){
+  const d = devis.find(x=>x.id===selectedId);
+  const fiche = document.getElementById('fiche');
+  fiche.innerHTML = `
+    <div class="badge-auto">extraction automatique</div>
+    <h2>${d.from}</h2>
+    <div class="fiche-sub">${d.email} — reçu le ${d.date} 2026 — pièce jointe : devis.pdf</div>
+    <div class="fiche-grid">
+      <div class="field">
+        <div class="k">Objet</div>
+        <div class="v">${d.obj}</div>
+      </div>
+      <div class="field">
+        <div class="k">Montant TTC</div>
+        <div class="v price">${d.prix.toLocaleString('fr-FR')} €</div>
+      </div>
+      <div class="field">
+        <div class="k">Délai annoncé</div>
+        <div class="v">${d.delai} semaines</div>
+      </div>
+      <div class="field">
+        <div class="k">Garantie</div>
+        <div class="v">${d.garantie} an${d.garantie>1?'s':''}</div>
+      </div>
+      <div class="field">
+        <div class="k">Certifications</div>
+        <div class="stamps">
+          ${d.certifs.length? d.certifs.map(c=>`<span class="stamp-mini">${c}</span>`).join(''):'<span class="stamp-mini none">aucune déclarée</span>'}
+        </div>
+      </div>
+      <div class="field">
+        <div class="k">Avis clients (source : moteur de recherche)</div>
+        <div class="v">${d.avis} / 5</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderLedger(){
+  const ranked = computeScores();
+  const body = document.getElementById('ledgerBody');
+  body.innerHTML = ranked.map((d,i)=>`
+    <tr class="${i===0?'top':''}">
+      <td class="supplier-cell">
+        <div class="name">${d.from}</div>
+        <div class="obj">${d.certifs.join(', ')||'sans certification'}</div>
+      </td>
+      <td class="num">${d.prix.toLocaleString('fr-FR')} €</td>
+      <td class="num">${d.delai} sem.</td>
+      <td class="num">${d.qualScore.toFixed(0)}/100</td>
+      <td>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${d.score.toFixed(0)}%"></div></div>
+        <div class="score-num">${d.score.toFixed(0)}/100</div>
+      </td>
+      <td>${i===0?'<span class="verdict">recommandé</span>':''}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAll(){
+  document.getElementById('wPriceVal').textContent = document.getElementById('wPrice').value;
+  document.getElementById('wDelayVal').textContent = document.getElementById('wDelay').value;
+  document.getElementById('wQualVal').textContent = document.getElementById('wQual').value;
+  renderInbox();
+  renderFiche();
+  renderLedger();
+}
+
+['wPrice','wDelay','wQual'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderAll);
+});
+
+renderAll();
+</script>
+</body>
+</html>
